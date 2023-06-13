@@ -3,7 +3,7 @@
 #include <vector>
 #include "bmp_image.h"
 
-int main(int argc, char *argv[]) {
+int solve(int argc, char *argv[]) {
     if (argc != 3) {
         throw std::runtime_error("Not enough arguments. Pass input_file.bmp and output_file.bmp");
     }
@@ -34,4 +34,13 @@ int main(int argc, char *argv[]) {
     image.write(ofs);
 
     return 0;
+}
+
+int main(int argc, char* argv[]) {
+    try {
+        return solve(argc, argv);
+    }
+    catch (std::exception& e) {
+        std::cerr << e.what();
+    }
 }

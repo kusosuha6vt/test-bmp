@@ -3,6 +3,7 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <string>
 
 void BmpImage::read_header(std::ifstream &ifs) {
     ifs.read(reinterpret_cast<char *>(&header), sizeof(header));
