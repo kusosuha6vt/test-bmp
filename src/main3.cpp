@@ -4,13 +4,13 @@
 #include "bmp_image.h"
 
 int solve(int argc, char *argv[]) {
-    if (argc != 3) {
-        throw std::runtime_error("Not enough arguments. Pass input_file.bmp and output_file.bmp");
+    if (argc != 4) {
+        throw std::runtime_error("Not enough arguments. Pass input_file.bmp logo.bmp and output_file.bmp");
     }
 
     std::string input_file = argv[1];
-    std::string output_file = argv[2];
-    const char *logo_path = "..\\images\\cat-logo.bmp";
+    std::string output_file = argv[3];
+    const char *logo_path = argv[2];
 
     BmpImage image;
     {

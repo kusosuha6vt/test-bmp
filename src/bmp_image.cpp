@@ -49,7 +49,9 @@ void BmpImage::write(std::ofstream &ofs) {
         ofs.write(reinterpret_cast<char *>(&palette[0]), palette.size());
     }
     std::vector<char> gap(header.offset - sizeof(header) - palette.size());
-    ofs.write(&gap[0], gap.size());
+    if (!gap.empty()) {
+        ofs.write(&gap[0], gap.size());
+    }
     ofs.write(reinterpret_cast<char *>(&bitmap[0]), bitmap.size());
 }
 
@@ -94,8 +96,28 @@ void BmpImage::make_black_and_white() {
 BmpImage BmpImage::frame_random_color() {
     static std::random_device gen;
     BmpImage other = *this;
+    if (header.colors_in_palette == 0) {
+        std::cerr << "Framing random color is not supported when palette is empty\n";
+        return other;
+    }
 
-    size_t random_color = std::uniform_int_distribution<>(0, header.colors_in_palette - 1)(gen);
+    size_t random_color;
+    if (header.colors_in_palette == (1 << header.bits_per_pixel)) {
+        std::cerr << "Palette consists of max colors, so choose random color in palette";
+        random_color = std::uniform_int_distribution<>(0, header.colors_in_palette - 1)(gen);
+    }
+    else {
+        std::cerr << "Palette has ability to add colors, so add random color to palette";
+        random_color = header.colors_in_palette;
+        other.header.colors_in_palette++;
+        other.header.number_of_important_colors++;
+        other.palette.emplace_back((std::byte) std::uniform_int_distribution<>(0, 255)(gen));
+        other.palette.emplace_back((std::byte) std::uniform_int_distribution<>(0, 255)(gen));
+        other.palette.emplace_back((std::byte) std::uniform_int_distribution<>(0, 255)(gen));
+        other.palette.emplace_back((std::byte) 0);
+        other.header.offset += 4;
+        other.header.file_size += 4;
+    }
     other.header.bitmap_height = (header.bitmap_height < 0 ? -1 : 1) * (std::abs(header.bitmap_height) + 30);
     other.header.bitmap_width = header.bitmap_width + 30;
     int n = (other.header.bitmap_width * header.bits_per_pixel + 31) / 32 * 4 * std::abs(other.header.bitmap_height);
